@@ -1,8 +1,7 @@
 import axios from "axios";
-import {useInfiniteQuery} from "react-query";
+import {QueryFunctionContext, useInfiniteQuery} from "react-query";
 import {NFT} from "@/app/types/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api-mainnet.magiceden.io/idxv2'
+import {API_URL} from "@/app/config";
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -22,28 +21,32 @@ export type ListedNfts = {
   offset: number
 }
 
+export const fetchQuery = async (params: QueryFunctionContext<string[], any>) => {
+  const offset = params.pageParam || 0
+  const collectionSymbol = params.queryKey[1]
+  const res = await apiClient.get<ListedNftsResponse>("/getListedNftsByCollectionSymbol", {
+    params: {
+      collectionSymbol,
+      limit: 20,
+      offset
+    }
+  })
+  return {data: res.data.results, offset: offset + 20}
+}
 
 export default function useNfts(slug: string, searchQuery?: string, initialData?: ListedNftsResponse | null) {
-  console.log(slug != null && !searchQuery)
   const query = useInfiniteQuery({
     queryKey: ['getListedNftsByCollectionSymbol', slug],
     enabled: slug != null,
+    keepPreviousData: true,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     getNextPageParam: (lastPage) => lastPage.offset || 0,
-    queryFn: async (params) => {
-      const offset = params.pageParam || 0
-      const res = await apiClient.get<ListedNftsResponse>("/getListedNftsByCollectionSymbol", {
-        params: {
-          collectionSymbol: slug,
-          limit: 20,
-          offset
-        }
-      })
-      return {data: res.data.results, offset: offset + 20}
-    },
+    queryFn: fetchQuery,
     initialData: () => {
       if (initialData) {
         return {
-          pageParams: [],
+          pageParams: [20],
           pages: [{data: initialData.results, offset: 0}]
         }
       }
