@@ -6,14 +6,14 @@ import VirtualScroller from "virtual-scroller/react";
 import useDebounce from "@/app/hooks/useDebounce";
 import IconSpinner from "@/app/components/IconSpinner";
 import {NFT} from "@/app/types/types";
-import NFTCard from "@/app/components/NFTCard";
+import NFTCard, {MemoizedNFTCard} from "@/app/components/NFTCard";
 import SimpleIntersectionObserver from "@/app/components/SimpleIntersectionObserver";
 import {slug} from "@/app/config";
 import useNfts from "@/app/hooks/useNfts";
 
 const gridClasses = "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8"
 
-export default function HomeLayout() {
+export default function HomeHydrated() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const debouncedSearchQuery = useDebounce(searchQuery)
   const {nfts, isError, refetch, filteredNfts, hasNextPage, fetchNextPage, isFetching, isLoading} = useNfts(slug, debouncedSearchQuery)
@@ -89,7 +89,7 @@ function ErrorWhileFetching({onClick}: {onClick: () => void}) {
 }
 
 function NFTList({ nfts, parentRef }: { nfts: NFT[], parentRef: RefObject<HTMLDivElement> }) {
-  return nfts.length > 20 ? <VirtualScroller
+  return <VirtualScroller
     items={nfts}
     getColumnsCount={(container) => {
       const width = container.getWidth()
@@ -101,12 +101,26 @@ function NFTList({ nfts, parentRef }: { nfts: NFT[], parentRef: RefObject<HTMLDi
     getItemId={(nft) => nft.id}
     className={gridClasses}
     getScrollableContainer={() => parentRef.current as HTMLElement}
-    itemComponent={({ item: nft }) => (
-      <NFTCard nft={nft} key={nft.id} />
-    )}
-  /> : (
-    <div className={gridClasses}>
-      {nfts.map((nft) => <NFTCard nft={nft} key={nft.id} />)}
-    </div>
-  )
+    itemComponent={MemoizedNFTCard}
+  />
+  // return nfts.length > 20 ? <VirtualScroller
+  //   items={nfts}
+  //   getColumnsCount={(container) => {
+  //     const width = container.getWidth()
+  //     if (width < 640) return 1
+  //     if (width < 768) return 2
+  //     if (width < 1024) return 3
+  //     return 4
+  //   }}
+  //   getItemId={(nft) => nft.id}
+  //   className={gridClasses}
+  //   getScrollableContainer={() => parentRef.current as HTMLElement}
+  //   itemComponent={({ item: nft }) => (
+  //     <NFTCard nft={nft} key={nft.id} />
+  //   )}
+  // /> : (
+  //   <div className={gridClasses}>
+  //     {nfts.map((nft) => <NFTCard nft={nft} key={nft.id} />)}
+  //   </div>
+  // )
 }

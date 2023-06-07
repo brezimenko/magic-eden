@@ -1,7 +1,8 @@
 import axios from "axios";
-import {QueryFunctionContext, useInfiniteQuery} from "react-query";
 import {NFT} from "@/app/types/types";
 import {API_URL} from "@/app/config";
+import {QueryFunctionContext} from "@tanstack/query-core";
+import {useInfiniteQuery} from "@tanstack/react-query";
 
 const apiClient = axios.create({
   baseURL: API_URL,

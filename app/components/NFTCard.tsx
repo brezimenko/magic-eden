@@ -1,12 +1,14 @@
 import Image from 'next/image'
 import {NFT} from "@/app/types/types";
 import MediaLoader, {PlaceHolder} from "@/app/components/MediaLoader";
+import React, {useLayoutEffect} from "react";
 
 type Props = {
-  nft: NFT
+  item: NFT,
+  onHeightChange: () => void
 }
 
-function NFTCard({nft}: Props) {
+function NFTCard({item: nft, onHeightChange}: Props) {
   return (
     <div className="flex flex-col items-center justify-center relative gap-4">
       <div className="relative aspect-square w-full">
@@ -33,5 +35,7 @@ NFTCard.Skeleton = function NFTCardSkeleton() {
     </div>
   )
 }
+
+export const MemoizedNFTCard = React.memo(NFTCard)
 
 export default NFTCard

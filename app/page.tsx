@@ -1,19 +1,18 @@
 import getQueryClient from './getQueryClient'
-import {dehydrate, Hydrate} from "react-query";
-import {fetchQuery} from "@/app/hooks/useNfts";
-import {slug} from "@/app/config";
-import HomeLayout from "@/app/components/HomeLayout";
-import HydrateClient from "@/app/components/HydrateClient";
+import HomeHydrated from "@/app/components/HomeHydrated";
+import {dehydrate} from "@tanstack/query-core";
+import {Hydrate} from "@tanstack/react-query";
 export default async function Home() {
   const queryClient = getQueryClient()
-  await queryClient.prefetchInfiniteQuery(['getListedNftsByCollectionSymbol', slug], fetchQuery)
+  // TODO: make sure to circumvent Cloudflare's antiscrape protection and enable SSR down the line
+  // await queryClient.prefetchInfiniteQuery(['getListedNftsByCollectionSymbol', slug], fetchQuery)
   const dehydratedState = dehydrate(queryClient, {
     shouldDehydrateQuery: () => true,
   })
 
   return (
-    <HydrateClient state={dehydratedState}>
-      <HomeLayout />
-    </HydrateClient>
+    <Hydrate state={dehydratedState}>
+      <HomeHydrated />
+    </Hydrate>
   )
 }
